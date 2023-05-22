@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Pintura FilePond example project</title>
+
+        <link
+            rel="stylesheet"
+            href="./node_modules/@pqina/pintura/pintura.css"
+        />
+
+        <link
+            rel="stylesheet"
+            href="./node_modules/filepond/dist/filepond.min.css"
+        />
+
+        <link
+            rel="stylesheet"
+            href="./node_modules/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css"
+        />
+
+        <style>
+            html {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                    Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+                    'Segoe UI Emoji', 'Segoe UI Symbol';
+                font-size: 16px;
+                line-height: 1.5;
+            }
+
+            body {
+                padding: 1em;
+            }
+
+            img {
+                max-width: 100%;
+            }
+
+            /* bright / dark mode */
+            .pintura-editor {
+                --color-background: 255, 255, 255;
+                --color-foreground: 10, 10, 10;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                html {
+                    color: #fff;
+                    background: #111;
+                }
+
+                .pintura-editor {
+                    --color-background: 10, 10, 10;
+                    --color-foreground: 255, 255, 255;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Pintura Image Editor</h1>
+
+        <input type="file" multiple />
+
+        <script type="module">
+            import * as FilePond from './node_modules/filepond/dist/filepond.esm.js';
+            import FilePondPluginFilePoster from './node_modules/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.esm.js';
+            import FilePondPluginImageEditor from './node_modules/@pqina/filepond-plugin-image-editor/dist/FilePondPluginImageEditor.js';
+
+            // Register FilePond plugins
+            FilePond.registerPlugin(
+                FilePondPluginImageEditor,
+                FilePondPluginFilePoster
+            );
+
+            import {
+                openEditor,
+                createDefaultImageReader,
+                createDefaultImageWriter,
+                processImage,
+                getEditorDefaults,
+            } from './node_modules/@pqina/pintura/pintura.js';
+
+            FilePond.create(document.querySelector('input'), {
+                /* FilePond properties */
+                allowReorder: true,
+                filePosterMaxHeight: 256,
+
+                /* Image Editor plugin properties */
+                imageEditor: {
+                    // used to create the editor, receives editor configuration, should return an editor instance
+                    createEditor: openEditor,
+
+                    // Required, used for reading the image data
+                    imageReader: [createDefaultImageReader],
+
+                    // optionally. can leave out when not generating a preview thumbnail and/or output image
+                    imageWriter: [
+                        createDefaultImageWriter,
+                        // optional image writer instructions, this instructs
+                        // the image writer to resize the image to match a width of 384 pixels
+                        {
+                            targetSize: {
+                                width: 384,
+                            },
+                        },
+                    ],
+
+                    // used to generate poster images, runs an editor in the background
+                    imageProcessor: processImage,
+
+                    // Pintura Image Editor properties
+                    editorOptions: {
+                        // pass the editor default configuration options
+                        ...getEditorDefaults(),
+
+                        // we want a square crop
+                        imageCropAspectRatio: 1,
+                    },
+
+                    // map legacy data objects to new imageState objects, uncomment if you've used FilePond with version 6 of Pintura and are loading old file metadata
+                    // legacyDataToImageState: legacyDataToImageState,
+                },
+
+                /* uncomment to preview the output image
+                onpreparefile: (fileItem, file) => {
+                    const image = new Image();
+                    image.src = URL.createObjectURL(file);
+                    document.body.appendChild(image);
+                },
+                */
+            });
+        </script>
+    </body>
+</html>
