@@ -1,4 +1,4 @@
-# Pintura JavaScript example project
+# Pintura FilePond example project
 
 Install `@pqina/pintura`, `@pqina/filepond-plugin-image-editor`, `filepond`, `filepond-plugin-file-poster`, and a local node server by running `npm install`, then run `npm start` to start the server on localhost.
 
