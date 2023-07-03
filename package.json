@@ -11,8 +11,8 @@
         "start": "npx http-server"
     },
     "dependencies": {
-        "@pqina/filepond-plugin-image-editor": "^9.0.1",
-        "@pqina/pintura": "^8.57.5",
+        "@pqina/filepond-plugin-image-editor": "^9.0.3",
+        "@pqina/pintura": "^8.60.10",
         "filepond": "^4.30.4",
         "filepond-plugin-file-poster": "^2.5.1"
     },
