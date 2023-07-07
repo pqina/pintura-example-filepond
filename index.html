@@ -20,6 +20,13 @@
             href="./node_modules/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css"
         />
 
+        <!-- Uncomment to load video editor extension
+        <link
+            rel="stylesheet"
+            href="./node_modules/@pqina/pintura-video/dist/pinturavideo.css"
+        />
+        -->
+
         <style>
             html {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -80,12 +87,29 @@
                 getEditorDefaults,
             } from './node_modules/@pqina/pintura/pintura.js';
 
+            /* Uncomment to load video editor extension
+            import {
+                setPlugins,
+                createDefaultMediaWriter,
+                imageStateToCanvas,
+            } from './node_modules/@pqina/pintura/pintura.js';
+
+            import {
+                plugin_trim_locale_en_gb,
+                plugin_trim,
+                createDefaultVideoWriter,
+                createMediaStreamEncoder,
+            } from './node_modules/@pqina/pintura-video/dist/pinturavideo.js';
+
+            // Load the Trim plugin view
+            setPlugins(plugin_trim);
+            */
+
             FilePond.create(document.querySelector('input'), {
-                /* FilePond properties */
                 allowReorder: true,
                 filePosterMaxHeight: 256,
 
-                /* Image Editor plugin properties */
+                // Image Editor plugin properties
                 imageEditor: {
                     // used to create the editor, receives editor configuration, should return an editor instance
                     createEditor: openEditor,
@@ -95,14 +119,41 @@
 
                     // optionally. can leave out when not generating a preview thumbnail and/or output image
                     imageWriter: [
+                        // The image writer to use
                         createDefaultImageWriter,
-                        // optional image writer instructions, this instructs
-                        // the image writer to resize the image to match a width of 384 pixels
+                        // optional image writer instructions, this instructs the image writer to resize the image to match a width of 384 pixels
                         {
                             targetSize: {
-                                width: 384,
+                                width: 128,
                             },
                         },
+
+                        /* Uncomment when editing videos, remove above code
+                        () =>
+                            createDefaultMediaWriter(
+                                // Generic Media Writer options, passed to image and video writer
+                                {
+                                    targetSize: {
+                                        width: 400,
+                                    },
+                                },
+                                [
+                                    // For handling images
+                                    createDefaultImageWriter(),
+
+                                    // For handling videos
+                                    createDefaultVideoWriter({
+                                        // Video writer instructions here
+                                        // ...
+
+                                        // Encoder to use
+                                        encoder: createMediaStreamEncoder({
+                                            imageStateToCanvas,
+                                        }),
+                                    }),
+                                ]
+                            ),
+                            */
                     ],
 
                     // used to generate poster images, runs an editor in the background
@@ -111,23 +162,52 @@
                     // Pintura Image Editor properties
                     editorOptions: {
                         // pass the editor default configuration options
-                        ...getEditorDefaults(),
+                        ...getEditorDefaults({
+                            /* Uncomment when editing videos
+                            locale: { ...plugin_trim_locale_en_gb },
+                            */
+                        }),
 
                         // we want a square crop
                         imageCropAspectRatio: 1,
                     },
 
-                    // map legacy data objects to new imageState objects, uncomment if you've used FilePond with version 6 of Pintura and are loading old file metadata
-                    // legacyDataToImageState: legacyDataToImageState,
+                    /* uncomment if you've used FilePond with version 6 of Pintura and are loading old file metadata
+                    // map legacy data objects to new imageState objects
+                    legacyDataToImageState: legacyDataToImageState,
+                    */
                 },
 
-                /* uncomment to preview the output image
-                onpreparefile: (fileItem, file) => {
-                    const image = new Image();
-                    image.src = URL.createObjectURL(file);
-                    document.body.appendChild(image);
+                /* Ucomment when editing videos
+                filePosterFilterItem: (item) => {
+                    // We currently cannot create video posters
+                    return /image/.test(item.fileType);
                 },
                 */
+
+                /* Ucomment when editing videos
+                // When editing video's it's advised to use asynchronous uploading, this will trigger video processing on upload instead of on file drop
+                instantUpload: false,
+                server: {
+                    // https://pqina.nl/filepond/docs/api/server/#end-points
+                },
+                */
+
+                /* Uncomment when editing videos
+                imageEditorSupportImage: (file) =>
+                    /image/.test(file.type) || /video/.test(file.type),
+                */
+
+                /* uncomment to preview the resulting file in the document after editing
+                onpreparefile: (fileItem, file) => {
+                    const media = document.createElement(
+                        /video/.test(file.type) ? 'video' : 'img'
+                    );
+                    media.controls = true;
+                    media.src = URL.createObjectURL(file);
+                    document.body.appendChild(media);
+                },
+                 */
             });
         </script>
     </body>
